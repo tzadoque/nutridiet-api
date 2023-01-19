@@ -10,6 +10,7 @@ const {
 } = require('../hooks/validateEthnicGroupField');
 const bcrypt = require('bcrypt');
 const generateToken = require('../hooks/generateToken');
+const { Op } = require('sequelize');
 
 module.exports = {
   async findAll(req, res) {
@@ -65,6 +66,60 @@ module.exports = {
     } catch (e) {
       return res.json(e.message);
     }
+  },
+
+  async findUsersByName(req, res) {
+    try {
+      const { role } = req.params;
+      let { name } = req.query;
+
+      if (!name) {
+        name = '';
+      }
+
+      if (
+        role !== 'administrador' &&
+        role !== 'nutricionista' &&
+        role !== 'paciente'
+      ) {
+        return res.json({
+          message: `O valor do parâmetro 'role' deve ser: administrador, nutricionista ou paciente`,
+        });
+      }
+
+      const users = await Users.findAll({
+        where: {
+          role: role,
+          name: {
+            [Op.like]: `%${name}%`,
+          },
+        },
+      });
+
+      if (!users) {
+        return res.json({ message: 'Nenhum usuário encontrado' });
+      }
+
+      return res.json(users);
+    } catch (e) {
+      return res.json(e.message);
+    }
+    const { name } = req.query;
+
+    const nutricionistas = await Users.findAll({
+      where: {
+        name: {
+          [Op.like]: `%${name}%`,
+        },
+        role: 'nutricionista',
+      },
+    });
+
+    if (!nutricionistas) {
+      return res.json({ message: 'Nenhum nutricionista encontrado' });
+    }
+
+    return res.json(nutricionistas);
   },
 
   async create(req, res) {
@@ -156,6 +211,13 @@ module.exports = {
         });
       }
 
+      // validação se o usuário é nutricionista
+      if (role === 'nutricionista' && !crn_number) {
+        return res.json({
+          message: `O campo 'crn_number' é obrigatório na criação de nutricionistas`,
+        });
+      }
+
       if (password != confirm_password) {
         // validação de senha
         return res.status(400).json({
@@ -231,6 +293,7 @@ module.exports = {
         birth_date,
         gender,
         ethnic_group,
+        crn_number,
       } = req.body;
 
       const updatedFields = {};
@@ -272,6 +335,11 @@ module.exports = {
         }
 
         updatedFields.email = email;
+      }
+
+      //validação do número de telefone
+      if (phone_number) {
+        updatedFields.phone_number;
       }
 
       // validação de cpf
@@ -366,6 +434,17 @@ module.exports = {
         }
 
         updatedFields.ethnic_group = ethnic_group;
+      }
+
+      // removendo crn_number caso a role de nutricionista tenha sido alterada
+      if (role != 'nutricionista') {
+        updatedFields.crn_number = null;
+      } else if (!crn_number) {
+        return res.json({
+          message: `Caso queira fazer desse usuário um nutricionista, é necessário informar o campo de 'crn_number'`,
+        });
+      } else {
+        updatedFields.crn_number = crn_number;
       }
 
       // atualizando o usuário
