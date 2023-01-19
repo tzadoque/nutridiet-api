@@ -2,7 +2,7 @@ const Users = require('../models/Users.js');
 const validateCPF = require('../hooks/validateCPF.js');
 const isAnInvalidEmail = require('../hooks/validateEmail.js');
 const isAnInvalidPassword = require('../hooks/validatePassword');
-const isAnInvalidBirthDate = require('../hooks/validateBirthDate');
+const isAnInvalidDate = require('../hooks/validateDate');
 const { isGender, genders } = require('../hooks/validateGenderField');
 const {
   isAnEthnicGroup,
@@ -104,22 +104,6 @@ module.exports = {
     } catch (e) {
       return res.json(e.message);
     }
-    const { name } = req.query;
-
-    const nutricionistas = await Users.findAll({
-      where: {
-        name: {
-          [Op.like]: `%${name}%`,
-        },
-        role: 'nutricionista',
-      },
-    });
-
-    if (!nutricionistas) {
-      return res.json({ message: 'Nenhum nutricionista encontrado' });
-    }
-
-    return res.json(nutricionistas);
   },
 
   async create(req, res) {
@@ -365,8 +349,6 @@ module.exports = {
         updatedFields.cpf = cpf;
       }
 
-      // validação da role
-
       // validação de role
       if (role) {
         if (
@@ -405,7 +387,7 @@ module.exports = {
 
       // validação da data de aniversário
       if (birth_date) {
-        if (isAnInvalidBirthDate(birth_date)) {
+        if (isAnInvalidDate(birth_date)) {
           return res.json({
             message: `O campo 'birth_date' precisa receber uma data no formato 'yyyy-mm-dd'`,
           });

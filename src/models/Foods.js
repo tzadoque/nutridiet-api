@@ -21,6 +21,11 @@ class Foods extends Model {
       {
         sequelize: connection,
         tableName: 'foods',
+        defaultScope: {
+          attributes: {
+            exclude: ['createdAt', 'updatedAt'],
+          },
+        },
       }
     );
   }
