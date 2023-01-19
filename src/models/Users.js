@@ -14,6 +14,7 @@ class Users extends Model {
         gender: DataTypes.STRING,
         ethnic_group: DataTypes.STRING,
         crn_number: DataTypes.STRING,
+        specialty: DataTypes.ENUM('nutricao-clinica', 'nutricao-esportiva'),
       },
       {
         sequelize: connection,

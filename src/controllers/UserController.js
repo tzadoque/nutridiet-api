@@ -120,6 +120,7 @@ module.exports = {
         gender,
         ethnic_group,
         crn_number,
+        specialty,
       } = req.body;
 
       // verificação de campos obrigatórios
@@ -196,10 +197,27 @@ module.exports = {
       }
 
       // validação se o usuário é nutricionista
-      if (role === 'nutricionista' && !crn_number) {
-        return res.json({
-          message: `O campo 'crn_number' é obrigatório na criação de nutricionistas`,
-        });
+      if (role === 'nutricionista') {
+        if (!crn_number) {
+          return res.json({
+            message: `O campo 'crn_number' é obrigatório na criação de usuários nutricionistas`,
+          });
+        }
+
+        if (!specialty) {
+          return res.json({
+            message: `O campo 'specialty' é obrigatório na criação de usuários nutricionistas`,
+          });
+        }
+
+        if (
+          specialty !== 'nutricao-clinica' &&
+          specialty !== 'nutricao-esportiva'
+        ) {
+          return res.json({
+            message: `O valor do campo 'specialty' deve ser: nutricao-clinica ou nutricao-esportiva`,
+          });
+        }
       }
 
       if (password != confirm_password) {
@@ -220,7 +238,7 @@ module.exports = {
       const passwordHash = await bcrypt.hash(password, salt);
 
       // validação da data de aniversário
-      if (isAnInvalidBirthDate(birth_date)) {
+      if (isAnInvalidDate(birth_date)) {
         return res.json({
           message: `O campo 'birth_date' precisa receber uma data no formato 'yyyy-mm-dd`,
         });
@@ -252,6 +270,7 @@ module.exports = {
         gender,
         ethnic_group,
         crn_number,
+        specialty,
       });
 
       return res.json({
@@ -278,6 +297,7 @@ module.exports = {
         gender,
         ethnic_group,
         crn_number,
+        specialty,
       } = req.body;
 
       const updatedFields = {};
@@ -418,15 +438,26 @@ module.exports = {
         updatedFields.ethnic_group = ethnic_group;
       }
 
-      // removendo crn_number caso a role de nutricionista tenha sido alterada
+      // removendo crn_number e specialty caso a role de nutricionista tenha sido alterada
       if (role != 'nutricionista') {
         updatedFields.crn_number = null;
-      } else if (!crn_number) {
+        updatedFields.specialty = null;
+      } else if (!crn_number || !specialty) {
         return res.json({
-          message: `Caso queira fazer desse usuário um nutricionista, é necessário informar o campo de 'crn_number'`,
+          message: `Caso queira fazer desse usuário um nutricionista, é necessário informar os campos de 'crn_number' e 'specialty'`,
         });
       } else {
+        if (
+          specialty !== 'nutricao-clinica' &&
+          specialty !== 'nutricao-esportiva'
+        ) {
+          return res.json({
+            message: `O valor do campo 'specialty' deve ser: nutricao-clinica ou nutricao-esportiva`,
+          });
+        }
+
         updatedFields.crn_number = crn_number;
+        updatedFields.specialty = specialty;
       }
 
       // atualizando o usuário

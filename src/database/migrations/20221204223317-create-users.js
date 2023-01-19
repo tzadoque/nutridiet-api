@@ -50,6 +50,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
       },
+      specialty: {
+        type: Sequelize.ENUM('nutricao-clinica', 'nutricao-esportiva'),
+        allowNull: true,
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
