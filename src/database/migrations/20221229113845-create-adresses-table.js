@@ -3,50 +3,41 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    return queryInterface.createTable('users', {
+    return queryInterface.createTable('addresses', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
       },
-      name: {
+      user_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: { model: 'users', key: 'id' },
+        onUpdate: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
+      zipcode: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      role: {
-        type: Sequelize.ENUM('administrador', 'nutricionista', 'paciente'),
-        allowNull: false,
-      },
-      email: {
+      street: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      phone_number: {
-        type: Sequelize.STRING,
+      number: {
+        type: Sequelize.INTEGER,
         allowNull: false,
       },
-      cpf: {
-        type: Sequelize.STRING,
+      state: {
+        type: Sequelize.INTEGER,
         allowNull: false,
       },
-      password: {
-        type: Sequelize.STRING,
+      country: {
+        type: Sequelize.INTEGER,
         allowNull: false,
       },
-      birth_date: {
-        type: Sequelize.DATEONLY,
-        allowNull: false,
-      },
-      gender: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      ethnic_group: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      crn_number: {
+      complement: {
         type: Sequelize.STRING,
         allowNull: true,
       },
@@ -62,6 +53,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    return queryInterface.dropTable('users');
+    return queryInterface.dropTable('addresses');
   },
 };

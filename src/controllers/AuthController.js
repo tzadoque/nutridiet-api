@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const Users = require('../models/Users');
 const validateCPF = require('../hooks/validateCPF.js');
 const bcrypt = require('bcrypt');
 const generateToken = require('../hooks/generateToken.js');
@@ -9,14 +9,14 @@ module.exports = {
       const { cpf, password } = req.body;
 
       if (!cpf || !password) {
-        return res.json({ message: 'Preencha os campos obrigatórios.' });
+        return res.json({ errorMsg: 'Preencha os campos obrigatórios.' });
       }
 
       if (!validateCPF(cpf)) {
-        return res.json({ message: 'O cpf informado não é válido' });
+        return res.json({ errorMsg: 'O cpf informado não é válido' });
       }
 
-      const user = await User.scope('withPassword').findOne({
+      const user = await Users.scope('withPassword').findOne({
         where: {
           cpf: cpf,
         },
@@ -25,18 +25,18 @@ module.exports = {
       if (!user) {
         return res
           .status(400)
-          .json({ message: 'O cpf informado não está cadastrado' });
+          .json({ errorMsg: 'O cpf informado não está cadastrado' });
       }
 
       if (!(await bcrypt.compare(password, user.password))) {
-        return res.status(400).json({ message: 'Senha inválida' });
+        return res.status(400).json({ errorMsg: 'Senha inválida' });
       }
 
       user.password = undefined;
 
       return res
         .status(200)
-        .json({ user, token: generateToken({ cpf: user.cpf }) });
+        .json({ user, token: generateToken({ user_id: user.id }) });
     } catch (e) {
       return res.json(e.message);
     }

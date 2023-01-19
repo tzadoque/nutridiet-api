@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const authConfig = require('../config/auth.json');
+const authConfig = require('../config/auth.js');
 
 module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -26,7 +26,7 @@ module.exports = (req, res, next) => {
     if (err) {
       return res.status(401).send({ message: 'Token inválido' });
     }
-    
+
     req.userCpf = decoded.cpf;
     return next();
   });
