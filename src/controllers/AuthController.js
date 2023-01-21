@@ -9,11 +9,20 @@ module.exports = {
       const { cpf, password } = req.body;
 
       if (!cpf || !password) {
-        return res.json({ errorMsg: 'Preencha os campos obrigatórios.' });
+        return res.json({
+          errorMsg: {
+            cpf: 'O campo cpf é obrigatório.',
+            password: 'O campo de senha é obrigatório.',
+          },
+        });
       }
 
       if (!validateCPF(cpf)) {
-        return res.json({ errorMsg: 'O cpf informado não é válido' });
+        return res.json({
+          errorMsg: {
+            cpf: 'O cpf informado não é válido',
+          },
+        });
       }
 
       const user = await Users.scope('withPassword').findOne({
@@ -23,13 +32,19 @@ module.exports = {
       });
 
       if (!user) {
-        return res
-          .status(400)
-          .json({ errorMsg: 'O cpf informado não está cadastrado' });
+        return res.status(400).json({
+          errorMsg: {
+            cpf: 'O cpf informado não está cadastrado',
+          },
+        });
       }
 
       if (!(await bcrypt.compare(password, user.password))) {
-        return res.status(400).json({ errorMsg: 'Senha inválida' });
+        return res.status(400).json({
+          errorMsg: {
+            password: 'Senha inválida',
+          },
+        });
       }
 
       user.password = undefined;

@@ -50,9 +50,14 @@ module.exports = {
     const { name, type, calories, lipids } = req.body;
 
     if (!name || !type || !calories || !lipids) {
-      return res
-        .status(400)
-        .json({ message: 'Preencha os campos obrigatórios' });
+      return res.status(400).json({
+        errorMsg: {
+          name: 'O campo nome é obrigatório',
+          type: 'O campo tipo é obrigatório',
+          calories: 'O campo calorias é obrigatório',
+          lipids: 'O campo lipídios é obrigatório',
+        },
+      });
     }
 
     try {
@@ -74,7 +79,9 @@ module.exports = {
       return created
         ? res.json({ message: `O alimento foi criado`, food })
         : res.json({
-            message: `O alimento que você tentou criar já existe`,
+            errorMsg: {
+              general: `O alimento que você tentou criar já existe`,
+            },
             food,
           });
     } catch (e) {
